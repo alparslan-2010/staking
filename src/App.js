@@ -1,35 +1,24 @@
-
-
 import logo from './logo.svg';
 import './App.css';
 import { ConnectWallet } from "@thirdweb-dev/react";
 import { useContract, useContractRead } from "@thirdweb-dev/react";
-
 import { useAddress } from "@thirdweb-dev/react";
+import { Web3Button } from "@thirdweb-dev/react";
 import { ethers } from "ethers";
 import "./styles/home.css";
-import { Web3Button } from "@thirdweb-dev/react";
 import { useState } from 'react';
 
-const stakingAdress = "0x41f7e79E6E8a631e04361e0F42b9Dd5a3D930e7D"
-const frank = "0xabfB60DE57fF93AA947009Ff60003E494aaCB66c"
-
+const stakingAddress = "0x41f7e79E6E8a631e04361e0F42b9Dd5a3D930e7D"; // Staking Contract
+const ustechTokenAddress = "0xabfB60DE57fF93AA947009Ff60003E494aaCB66c"; // FRANK Token Address
 function App() {
 
-  const { contract } = useContract("0x33690D1F2938a10c53151bD6931C9b95Dbe94A7C");
+  const { contract: stakingContract, isLoading: isStakingContractLoading   } = useContract(stakingAddress);
+  const {contract: ustechToken,isLoading: isUstechTokenLoading} = useContract(ustechTokenAddress);
 
-  const {contract : stakingToken, isLoading: isStakingLoading} = useContract({frank})
- 
- console.log(stakingToken)
+  console.log(ustechToken);
   const address = useAddress();
-
-
-
-  const { data, isLoading } = useContractRead(contract, "getStakeInfo", [address])
-
-  const [amountToStake, setamountToStake] = useState(0)
-
-
+  const { data, isLoading } = useContractRead(stakingContract, "getStakeInfo", [address])
+  const[amountToStake,setAmountToStake] = useState(0);
 
   return (
     <>
@@ -45,55 +34,60 @@ function App() {
             <ConnectWallet />
           </div>
 
-          <div className='stakeContainer'>
+          <div className="stakeContainer">
+            <input className="textbox" 
+                   type="number" 
+                   value={amountToStake} 
+                   onChange={(e) => setAmountToStake(e.target.value)} />
 
-            <input className='textbox' type="number"
-              onChange={(e) => setamountToStake(e.target.value)} />
             <Web3Button
-              contractAddress={stakingAdress}
-              action={async (contract) => { 
+              contractAddress={stakingAddress}
+              action={async (contract) => {
+                // ERC20 tokeni degisken olarak olusturmam lazim
+                await ustechToken.setAllowance(stakingAddress,amountToStake);
 
-                //erc 20 tokenei degisken olrak olusturmam lazim
-
-                await stakingToken.setAllowance(stakingAdress,amountToStake);
-
-                await contract.call("stake",[ethers.utils.parseEther(amountToStake)]) }}
-
+                await contract.call(
+                  "stake",
+                [ethers.utils.parseEther(amountToStake)])
+              }}
               theme="dark"
             >
               Stake
             </Web3Button>
 
             <Web3Button
-              contractAddress={stakingAdress}
-              action={async (contract) => { 
+              contractAddress={stakingAddress}
+              action={async (contract) => {
 
-              
-                await contract.call("withdraw",[ethers.utils.parseEther(amountToStake)]) }}
+                await contract.call(
+                  "withdraw",
+                [ethers.utils.parseEther(amountToStake)])
 
+              }}
               theme="dark"
             >
-              unStake (withdraw)
+              UnStake (Withdraw)
             </Web3Button>
 
             <Web3Button
-              contractAddress={stakingAdress}
-              action={async (contract) => { 
+              contractAddress={stakingAddress}
+              action={async (contract) => {
 
-              
-                await contract.call("claimRewards")}}
-
+                await contract.call("claimRewards")
+                
+              }}
               theme="dark"
             >
-             claim reward
+              Claim Rewards!
             </Web3Button>
           </div>
+
           <div className="grid">
             <a className="card">
-              Staked: {data?._tokensStaked && ethers.utils.formatEther(data?._tokensStaked)} UT <br></br>
+              Staked: {data?._tokensStaked && ethers.utils.formatEther(data?._tokensStaked)} CHF <br></br>
             </a>
             <a className="card">
-              Rewards: {data?._rewards && Number(ethers.utils.formatEther(data?._rewards)).toFixed(2)} MET
+              Rewards: {data?._rewards && Number(ethers.utils.formatEther(data?._rewards)).toFixed(2)} MTK
             </a>
           </div>
         </main>
