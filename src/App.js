@@ -19,7 +19,7 @@ function App() {
   const address = useAddress();
   const { data, isLoading } = useContractRead(stakingContract, "getStakeInfo", [address])
   const[amountToStake,setAmountToStake] = useState(0);
-
+//gfhfghg
   return (
     <>
       <div className="container">
@@ -55,6 +55,8 @@ function App() {
               Stake
             </Web3Button>
 
+           
+
             <Web3Button
               contractAddress={stakingAddress}
               action={async (contract) => {
@@ -80,6 +82,9 @@ function App() {
             >
               Claim Rewards!
             </Web3Button>
+
+
+            
           </div>
 
           <div className="grid">
